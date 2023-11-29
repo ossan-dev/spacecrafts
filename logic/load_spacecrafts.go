@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 )
 
 func FetchSpacecrafts(url string) ([]*domain.Spacecraft, error) {

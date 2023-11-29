@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"esdemov8/cmd/server/store"
-	"esdemov8/domain"
+	"spacecrafts/cmd/server/store"
+	"spacecrafts/domain"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

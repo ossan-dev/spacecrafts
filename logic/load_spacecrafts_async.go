@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 )
 
 var errChan chan error = make(chan error)

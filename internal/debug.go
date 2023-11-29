@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"os"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 )
 
 func PrintSpacecrafts(w io.Writer, spacecrafts []*domain.Spacecraft) {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 )
 
 func LoadSpacecraftsFromFile(filepath string) ([]*domain.Spacecraft, error) {

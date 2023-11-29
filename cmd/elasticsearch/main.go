@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"esdemov8/domain"
-	"esdemov8/logic"
+	"spacecrafts/domain"
+	"spacecrafts/logic"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 )
 
 var Spacecrafts []*domain.Spacecraft

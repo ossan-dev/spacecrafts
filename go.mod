@@ -1,4 +1,4 @@
-module esdemov8
+module spacecrafts
 
 go 1.21.4
 

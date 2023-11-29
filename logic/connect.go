@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"esdemov8/domain"
+	"spacecrafts/domain"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )

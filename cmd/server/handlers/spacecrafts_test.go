@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"esdemov8/cmd/server/handlers"
-	"esdemov8/cmd/server/store"
+	"spacecrafts/cmd/server/handlers"
+	"spacecrafts/cmd/server/store"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

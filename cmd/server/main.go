@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"esdemov8/cmd/server/handlers"
-	"esdemov8/cmd/server/store"
+	"spacecrafts/cmd/server/handlers"
+	"spacecrafts/cmd/server/store"
 )
 
 func main() {
