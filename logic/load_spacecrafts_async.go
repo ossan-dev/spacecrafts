@@ -22,12 +22,12 @@ func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacec
 		return
 	}
 	defer res.Body.Close()
-	var stapiRes domain.StapiResponse
-	if err := json.NewDecoder(res.Body).Decode(&stapiRes); err != nil {
+	var spacecraftWrapper domain.SpacecraftWrapper
+	if err := json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
 		errChan <- err
 		return
 	}
-	for _, v := range stapiRes.Spacecraft {
+	for _, v := range spacecraftWrapper.Data {
 		select {
 		case err := <-errChan:
 			close(errChan)
@@ -45,28 +45,28 @@ func LoadspacecraftAsync(ctx context.Context) (context.Context, error) {
 		elapsedTime := time.Since(startTime)
 		fmt.Println("LoadspacecraftAsync() took", elapsedTime)
 	}()
-	res, err := http.Get("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=0&pageSize=100")
+	res, err := http.Get("http://localhost:8080/spacecraft?pageNumber=0&pageSize=100")
 	if err != nil {
 		return ctx, err
 	}
 	defer res.Body.Close()
-	var stapiRes domain.StapiResponse
-	if err = json.NewDecoder(res.Body).Decode(&stapiRes); err != nil {
+	var spacecraftWrapper domain.SpacecraftWrapper
+	if err = json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
 		return ctx, err
 	}
-	if stapiRes.Page == nil || stapiRes.Page.TotalPages == 0 {
+	if spacecraftWrapper.TotalPages == 0 {
 		return ctx, fmt.Errorf("empty resultset")
 	}
 	var spacecraft []*domain.Spacecraft
-	if stapiRes.Spacecraft == nil || len(stapiRes.Spacecraft) == 0 {
+	if len(spacecraftWrapper.Data) == 0 {
 		return ctx, fmt.Errorf("no spacecraft in the page")
 	}
-	spacecraft = append(spacecraft, stapiRes.Spacecraft...)
+	spacecraft = append(spacecraft, spacecraftWrapper.Data...)
 	var wg sync.WaitGroup
-	ch := make(chan *domain.Spacecraft, stapiRes.Page.TotalElements)
-	for i := 1; i < stapiRes.Page.TotalPages; i++ {
+	ch := make(chan *domain.Spacecraft, spacecraftWrapper.TotalElements)
+	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
 		wg.Add(1)
-		go FetchspacecraftAsync(fmt.Sprintf("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=%d&pageSize=100", i), &wg, ch)
+		go FetchspacecraftAsync(fmt.Sprintf("http://localhost:8080/spacecraft?pageNumber=%d&pageSize=100", i), &wg, ch)
 	}
 	wg.Wait()
 	close(ch)

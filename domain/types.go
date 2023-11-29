@@ -31,10 +31,11 @@ type Spacecraft struct {
 	Operator        map[string]interface{} `json:"operator"`
 }
 
-type StapiResponse struct {
-	Page *struct {
-		TotalPages    int `json:"totalPages"`
-		TotalElements int `json:"totalElements"`
-	} `json:"page"`
-	Spacecraft []*Spacecraft `json:"spacecraft"`
+type SpacecraftWrapper struct {
+	PageNumber       int           `json:"pageNumber"`
+	PageSize         int           `json:"pageSize"`
+	NumberOfElements int           `json:"numberOfElements"`
+	TotalPages       int           `json:"totalPages"`
+	TotalElements    int           `json:"totalElements"`
+	Data             []*Spacecraft `json:"data"`
 }

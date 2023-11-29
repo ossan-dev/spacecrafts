@@ -45,7 +45,7 @@ func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 	result.PageNumber = *pageNumber
 	result.PageSize = *pageSize
 	result.NumberOfElements = *pageSize
-	result.TotalPages = len(Spacecraft) / *pageSize
+	result.TotalPages = (len(Spacecraft) / *pageSize) + 1
 	result.TotalElements = len(Spacecraft)
 	if high >= len(Spacecraft) {
 		result.NumberOfElements = len(Spacecraft[low:])

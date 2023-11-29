@@ -11,14 +11,14 @@ import (
 func main() {
 	ctx := context.Background()
 	// ctx = logic.ConnectWithElasticSearch(ctx)
-	// ctx, err := logic.LoadspacecraftAsync(ctx)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	ctx, err := logic.Loadspacecraft(ctx)
+	ctx, err := logic.LoadspacecraftAsync(ctx)
 	if err != nil {
 		panic(err)
 	}
+	// ctx, err := logic.Loadspacecraft(ctx)
+	// if err != nil {
+	// 	panic(err)
+	// }
 	spacecraft := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
 	if spacecraft == nil {
 		panic("no spacecraft in context")
