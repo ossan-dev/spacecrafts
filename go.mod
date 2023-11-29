@@ -1,4 +1,4 @@
-module spacecrafts
+module spacecraft
 
 go 1.21.4
 

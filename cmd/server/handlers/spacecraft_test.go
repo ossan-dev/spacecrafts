@@ -5,47 +5,47 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"spacecrafts/cmd/server/handlers"
-	"spacecrafts/cmd/server/store"
+	"spacecraft/cmd/server/handlers"
+	"spacecraft/cmd/server/store"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetSpacecrafts(t *testing.T) {
+func TestGetspacecraft(t *testing.T) {
 	var err error
-	handlers.Spacecrafts, err = store.LoadSpacecraftsFromFile("../store/spacecrafts.json")
+	handlers.Spacecraft, err = store.LoadspacecraftFromFile("../store/spacecraft.json")
 	require.NoError(t, err)
 	srv := http.NewServeMux()
-	srv.HandleFunc("/spacecrafts", handlers.GetSpacecrafts)
+	srv.HandleFunc("/spacecraft", handlers.Getspacecraft)
 	testSuite := []struct {
 		name               string
 		url                string
 		expectedStatusCode int
 	}{
 		{
-			name:               "get paginated spacecrafts",
-			url:                "/spacecrafts?pageSize=100&pageNumber=0",
+			name:               "get paginated spacecraft",
+			url:                "/spacecraft?pageSize=100&pageNumber=0",
 			expectedStatusCode: http.StatusOK,
 		},
 		{
 			name:               "pageSize NAN",
-			url:                "/spacecrafts?pageSize=abc&pageNumber=0",
+			url:                "/spacecraft?pageSize=abc&pageNumber=0",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
 			name:               "pageNumber NAN",
-			url:                "/spacecrafts?pageSize=100&pageNumber=abc",
+			url:                "/spacecraft?pageSize=100&pageNumber=abc",
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
 			name:               "pageSize not provided",
-			url:                "/spacecrafts?pageNumber=0",
+			url:                "/spacecraft?pageNumber=0",
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			name:               "get last spacecrafts page",
-			url:                "/spacecrafts?pageSize=100&pageNumber=14",
+			name:               "get last spacecraft page",
+			url:                "/spacecraft?pageSize=100&pageNumber=14",
 			expectedStatusCode: http.StatusOK,
 		},
 	}

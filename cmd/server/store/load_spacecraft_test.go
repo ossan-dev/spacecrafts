@@ -5,17 +5,17 @@ import (
 	"os"
 	"testing"
 
-	"spacecrafts/cmd/server/store"
-	"spacecrafts/domain"
+	"spacecraft/cmd/server/store"
+	"spacecraft/domain"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadSpacecraftsFromFile(t *testing.T) {
+func TestLoadspacecraftFromFile(t *testing.T) {
 	t.Run("existent file", func(t *testing.T) {
 		// Arrange
-		spacecrafts := []*domain.Spacecraft{
+		spacecraft := []*domain.Spacecraft{
 			{
 				Uid:        "015",
 				Name:       "test spacecraft",
@@ -39,9 +39,9 @@ func TestLoadSpacecraftsFromFile(t *testing.T) {
 				},
 			},
 		}
-		data, err := json.Marshal(&spacecrafts)
+		data, err := json.Marshal(&spacecraft)
 		require.NoError(t, err)
-		filepath := "test_spacecrafts.json"
+		filepath := "test_spacecraft.json"
 		err = os.WriteFile(filepath, data, os.ModePerm)
 		require.NoError(t, err)
 		defer func() {
@@ -49,16 +49,16 @@ func TestLoadSpacecraftsFromFile(t *testing.T) {
 			require.NoError(t, err)
 		}()
 		// Act
-		res, err := store.LoadSpacecraftsFromFile(filepath)
+		res, err := store.LoadspacecraftFromFile(filepath)
 		// Assert
 		require.NotNil(t, res)
 		require.Nil(t, err)
-		assert.Equal(t, len(spacecrafts), len(res))
+		assert.Equal(t, len(spacecraft), len(res))
 	})
 	t.Run("non existent file", func(t *testing.T) {
 		// Arrange
 		// Act
-		res, err := store.LoadSpacecraftsFromFile("unknown_spacecrafts.json")
+		res, err := store.LoadspacecraftFromFile("unknown_spacecraft.json")
 		// Assert
 		require.Nil(t, res)
 		require.NotNil(t, err)

@@ -6,10 +6,10 @@ import (
 	"io"
 	"os"
 
-	"spacecrafts/domain"
+	"spacecraft/domain"
 )
 
-func LoadSpacecraftsFromFile(filepath string) ([]*domain.Spacecraft, error) {
+func LoadspacecraftFromFile(filepath string) ([]*domain.Spacecraft, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, fmt.Errorf("err while opening file: %v", err)

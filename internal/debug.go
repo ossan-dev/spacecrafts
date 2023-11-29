@@ -7,17 +7,17 @@ import (
 	"io/fs"
 	"os"
 
-	"spacecrafts/domain"
+	"spacecraft/domain"
 )
 
-func PrintSpacecrafts(w io.Writer, spacecrafts []*domain.Spacecraft) {
-	for k, v := range spacecrafts {
+func Printspacecraft(w io.Writer, spacecraft []*domain.Spacecraft) {
+	for k, v := range spacecraft {
 		fmt.Fprintf(w, "%d\t%v\n", k, v)
 	}
 }
 
-func WriteSpacecraftsToFile(filepath string, spacecrafts []*domain.Spacecraft) error {
-	data, err := json.MarshalIndent(spacecrafts, "", "\t")
+func WritespacecraftToFile(filepath string, spacecraft []*domain.Spacecraft) error {
+	data, err := json.MarshalIndent(spacecraft, "", "\t")
 	if err != nil {
 		return err
 	}

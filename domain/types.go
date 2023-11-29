@@ -36,5 +36,5 @@ type StapiResponse struct {
 		TotalPages    int `json:"totalPages"`
 		TotalElements int `json:"totalElements"`
 	} `json:"page"`
-	Spacecrafts []*Spacecraft `json:"spacecrafts"`
+	Spacecraft []*Spacecraft `json:"spacecraft"`
 }

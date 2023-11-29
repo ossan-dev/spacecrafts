@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"spacecrafts/domain"
+	"spacecraft/domain"
 )
 
-var Spacecrafts []*domain.Spacecraft
+var Spacecraft []*domain.Spacecraft
 
 func extractIntQueryParam(r *http.Request, paramName string, defaultValue int) (*int, error) {
 	urlValues := r.URL.Query()
@@ -26,7 +26,7 @@ func extractIntQueryParam(r *http.Request, paramName string, defaultValue int) (
 	return &result, nil
 }
 
-func GetSpacecrafts(w http.ResponseWriter, r *http.Request) {
+func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 	pageSize, err := extractIntQueryParam(r, "pageSize", 100)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -42,10 +42,10 @@ func GetSpacecrafts(w http.ResponseWriter, r *http.Request) {
 	low := *pageNumber * *pageSize
 	high := low + *pageSize
 	var result []*domain.Spacecraft
-	if high >= len(Spacecrafts) {
-		result = Spacecrafts[low:]
+	if high >= len(Spacecraft) {
+		result = Spacecraft[low:]
 	} else {
-		result = Spacecrafts[low:high]
+		result = Spacecraft[low:high]
 	}
 	data, err := json.MarshalIndent(result, "", "\t")
 	if err != nil {

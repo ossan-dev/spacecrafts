@@ -4,28 +4,28 @@ import (
 	"context"
 	"fmt"
 
-	"spacecrafts/domain"
-	"spacecrafts/logic"
+	"spacecraft/domain"
+	"spacecraft/logic"
 )
 
 func main() {
 	ctx := context.Background()
 	// ctx = logic.ConnectWithElasticSearch(ctx)
-	// ctx, err := logic.LoadSpacecraftsAsync(ctx)
+	// ctx, err := logic.LoadspacecraftAsync(ctx)
 	// if err != nil {
 	// 	panic(err)
 	// }
-	ctx, err := logic.LoadSpacecrafts(ctx)
+	ctx, err := logic.Loadspacecraft(ctx)
 	if err != nil {
 		panic(err)
 	}
-	spacecrafts := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
-	if spacecrafts == nil {
-		panic("no spacecrafts in context")
+	spacecraft := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
+	if spacecraft == nil {
+		panic("no spacecraft in context")
 	}
-	// if err := internal.WriteSpacecraftsToFile("domain/spacecrafts.json", spacecrafts); err != nil {
-	// 	fmt.Println(fmt.Errorf("WriteSpacecraftsToFile() err: %v", err))
+	// if err := internal.WritespacecraftToFile("domain/spacecraft.json", spacecraft); err != nil {
+	// 	fmt.Println(fmt.Errorf("WritespacecraftToFile() err: %v", err))
 	// }
-	// internal.PrintSpacecrafts(os.Stdout, spacecrafts)
-	fmt.Println("number of spacecrafts:", len(spacecrafts))
+	// internal.Printspacecraft(os.Stdout, spacecraft)
+	fmt.Println("number of spacecraft:", len(spacecraft))
 }

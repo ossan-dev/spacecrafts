@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"spacecrafts/domain"
+	"spacecraft/domain"
 )
 
 var errChan chan error = make(chan error)
 
-func FetchSpaceCraftsAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacecraft) {
+func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacecraft) {
 	fmt.Println(url)
 	defer wg.Done()
 	res, err := http.Get(url)
@@ -27,7 +27,7 @@ func FetchSpaceCraftsAsync(url string, wg *sync.WaitGroup, ch chan *domain.Space
 		errChan <- err
 		return
 	}
-	for _, v := range stapiRes.Spacecrafts {
+	for _, v := range stapiRes.Spacecraft {
 		select {
 		case err := <-errChan:
 			close(errChan)
@@ -39,11 +39,11 @@ func FetchSpaceCraftsAsync(url string, wg *sync.WaitGroup, ch chan *domain.Space
 	}
 }
 
-func LoadSpacecraftsAsync(ctx context.Context) (context.Context, error) {
+func LoadspacecraftAsync(ctx context.Context) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
 		elapsedTime := time.Since(startTime)
-		fmt.Println("LoadSpacecraftsAsync() took", elapsedTime)
+		fmt.Println("LoadspacecraftAsync() took", elapsedTime)
 	}()
 	res, err := http.Get("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=0&pageSize=100")
 	if err != nil {
@@ -57,16 +57,16 @@ func LoadSpacecraftsAsync(ctx context.Context) (context.Context, error) {
 	if stapiRes.Page == nil || stapiRes.Page.TotalPages == 0 {
 		return ctx, fmt.Errorf("empty resultset")
 	}
-	var spacecrafts []*domain.Spacecraft
-	if stapiRes.Spacecrafts == nil || len(stapiRes.Spacecrafts) == 0 {
-		return ctx, fmt.Errorf("no spacecrafts in the page")
+	var spacecraft []*domain.Spacecraft
+	if stapiRes.Spacecraft == nil || len(stapiRes.Spacecraft) == 0 {
+		return ctx, fmt.Errorf("no spacecraft in the page")
 	}
-	spacecrafts = append(spacecrafts, stapiRes.Spacecrafts...)
+	spacecraft = append(spacecraft, stapiRes.Spacecraft...)
 	var wg sync.WaitGroup
 	ch := make(chan *domain.Spacecraft, stapiRes.Page.TotalElements)
 	for i := 1; i < stapiRes.Page.TotalPages; i++ {
 		wg.Add(1)
-		go FetchSpaceCraftsAsync(fmt.Sprintf("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=%d&pageSize=100", i), &wg, ch)
+		go FetchspacecraftAsync(fmt.Sprintf("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=%d&pageSize=100", i), &wg, ch)
 	}
 	wg.Wait()
 	close(ch)
@@ -77,8 +77,8 @@ func LoadSpacecraftsAsync(ctx context.Context) (context.Context, error) {
 		fmt.Println("no errors received!")
 	}
 	for msg := range ch {
-		spacecrafts = append(spacecrafts, msg)
+		spacecraft = append(spacecraft, msg)
 	}
-	ctx = context.WithValue(ctx, domain.ModelsKey, spacecrafts)
+	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
 	return ctx, nil
 }

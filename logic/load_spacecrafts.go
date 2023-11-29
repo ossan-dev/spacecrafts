@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"spacecrafts/domain"
+	"spacecraft/domain"
 )
 
-func FetchSpacecrafts(url string) ([]*domain.Spacecraft, error) {
+func Fetchspacecraft(url string) ([]*domain.Spacecraft, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -20,19 +20,19 @@ func FetchSpacecrafts(url string) ([]*domain.Spacecraft, error) {
 	if err = json.NewDecoder(res.Body).Decode(&stapiRes); err != nil {
 		return nil, err
 	}
-	if stapiRes.Spacecrafts == nil || len(stapiRes.Spacecrafts) == 0 {
-		return nil, fmt.Errorf("no spacecrafts in the page")
+	if stapiRes.Spacecraft == nil || len(stapiRes.Spacecraft) == 0 {
+		return nil, fmt.Errorf("no spacecraft in the page")
 	}
-	var spacecrafts []*domain.Spacecraft
-	spacecrafts = append(spacecrafts, stapiRes.Spacecrafts...)
-	return spacecrafts, nil
+	var spacecraft []*domain.Spacecraft
+	spacecraft = append(spacecraft, stapiRes.Spacecraft...)
+	return spacecraft, nil
 }
 
-func LoadSpacecrafts(ctx context.Context) (context.Context, error) {
+func Loadspacecraft(ctx context.Context) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
 		elapsedTime := time.Since(startTime)
-		fmt.Println("LoadSpacecrafts() took", elapsedTime)
+		fmt.Println("Loadspacecraft() took", elapsedTime)
 	}()
 	res, err := http.Get("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=0&pageSize=100")
 	if err != nil {
@@ -46,18 +46,18 @@ func LoadSpacecrafts(ctx context.Context) (context.Context, error) {
 	if stapiRes.Page == nil || stapiRes.Page.TotalPages == 0 {
 		return ctx, fmt.Errorf("empty resultset")
 	}
-	var spacecrafts []*domain.Spacecraft
-	if stapiRes.Spacecrafts == nil || len(stapiRes.Spacecrafts) == 0 {
-		return ctx, fmt.Errorf("no spacecrafts in the page")
+	var spacecraft []*domain.Spacecraft
+	if stapiRes.Spacecraft == nil || len(stapiRes.Spacecraft) == 0 {
+		return ctx, fmt.Errorf("no spacecraft in the page")
 	}
-	spacecrafts = append(spacecrafts, stapiRes.Spacecrafts...)
+	spacecraft = append(spacecraft, stapiRes.Spacecraft...)
 	for i := 1; i < stapiRes.Page.TotalPages; i++ {
-		newSpacrafts, err := FetchSpacecrafts(fmt.Sprintf("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=%d&pageSize=100", i))
+		newSpacrafts, err := Fetchspacecraft(fmt.Sprintf("https://stapi.co/api/v1/rest/spacecraft/search?pageNumber=%d&pageSize=100", i))
 		if err != nil {
 			return ctx, err
 		}
-		spacecrafts = append(spacecrafts, newSpacrafts...)
+		spacecraft = append(spacecraft, newSpacrafts...)
 	}
-	ctx = context.WithValue(ctx, domain.ModelsKey, spacecrafts)
+	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
 	return ctx, nil
 }
