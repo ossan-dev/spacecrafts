@@ -40,17 +40,13 @@ func TestLoadSpacecraftsFromFile(t *testing.T) {
 			},
 		}
 		data, err := json.Marshal(&spacecrafts)
-		if err != nil {
-			t.Fatalf("err while marshaling: %v", err)
-		}
+		require.NoError(t, err)
 		filepath := "test_spacecrafts.json"
-		if err := os.WriteFile(filepath, data, os.ModePerm); err != nil {
-			t.Fatalf("err while writing the file")
-		}
+		err = os.WriteFile(filepath, data, os.ModePerm)
+		require.NoError(t, err)
 		defer func() {
-			if err := os.Remove(filepath); err != nil {
-				t.Errorf("failed to remove file %q with err: %v", filepath, err)
-			}
+			err = os.Remove(filepath)
+			require.NoError(t, err)
 		}()
 		// Act
 		res, err := store.LoadSpacecraftsFromFile(filepath)
