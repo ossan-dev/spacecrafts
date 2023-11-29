@@ -44,10 +44,8 @@ func GetSpacecrafts(w http.ResponseWriter, r *http.Request) {
 	var result []*domain.Spacecraft
 	if high >= len(Spacecrafts) {
 		result = Spacecrafts[low:]
-		fmt.Println("high >= len(Spacecrafts):", len(result), "spacecrafts")
 	} else {
 		result = Spacecrafts[low:high]
-		fmt.Println("else:", len(result), "spacecrafts")
 	}
 	data, err := json.MarshalIndent(result, "", "\t")
 	if err != nil {
