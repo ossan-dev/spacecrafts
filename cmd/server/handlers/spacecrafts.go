@@ -39,7 +39,7 @@ func GetSpacecrafts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	low := *pageNumber * *pageSize
-	high := (low + 1) * *pageSize
+	high := low + *pageSize
 	var result []*domain.Spacecraft
 	if high >= len(Spacecrafts) {
 		result = Spacecrafts[low:]
