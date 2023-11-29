@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"esdemov8/domain"
 )
@@ -54,5 +55,6 @@ func GetSpacecrafts(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	time.Sleep(2 * time.Second)
 	w.Write([]byte(data))
 }
