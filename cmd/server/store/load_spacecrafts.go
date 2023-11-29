@@ -2,22 +2,26 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
 	"esdemov8/domain"
 )
 
-func LoadSpacecraftsFromFile(filepath string) (res []*domain.Spacecraft, err error) {
+func LoadSpacecraftsFromFile(filepath string) ([]*domain.Spacecraft, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("err while opening file: %v", err)
 	}
 	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("err while reading file: %v", err)
 	}
-	err = json.Unmarshal(data, &res)
-	return
+	var res []*domain.Spacecraft
+	if err = json.Unmarshal(data, &res); err != nil {
+		return nil, fmt.Errorf("err while unmarshaling file: %v", err)
+	}
+	return res, nil
 }

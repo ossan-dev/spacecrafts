@@ -15,21 +15,20 @@ var (
 /****************************************************/
 /************* Domain Types *************************/
 /****************************************************/
+type SpacecraftInfo struct {
+	Uid  string `json:"uid"`
+	Name string `json:"name"`
+}
+
 type Spacecraft struct {
-	Uid             string `json:"uid"`
-	Name            string `json:"name"`
-	Registry        string `json:"registry"`
-	Status          string `json:"status"`
-	DateStatus      string `json:"dateStatus"`
-	SpacecraftClass struct {
-		Uid  string `json:"uid"`
-		Name string `json:"name"`
-	} `json:"spacecraftClass"`
-	Owner struct {
-		Uid  string `json:"uid"`
-		Name string `json:"name"`
-	} `json:"owner"`
-	Operator map[string]interface{} `json:"operator"`
+	Uid             string                 `json:"uid"`
+	Name            string                 `json:"name"`
+	Registry        string                 `json:"registry"`
+	Status          string                 `json:"status"`
+	DateStatus      string                 `json:"dateStatus"`
+	SpacecraftClass *SpacecraftInfo        `json:"spacecraftClass"`
+	Owner           *SpacecraftInfo        `json:"owner"`
+	Operator        map[string]interface{} `json:"operator"`
 }
 
 type StapiResponse struct {
