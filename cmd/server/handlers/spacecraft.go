@@ -41,11 +41,17 @@ func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 	}
 	low := *pageNumber * *pageSize
 	high := low + *pageSize
-	var result []*domain.Spacecraft
+	var result domain.SpacecraftWrapper
+	result.PageNumber = *pageNumber
+	result.PageSize = *pageSize
+	result.NumberOfElements = *pageSize
+	result.TotalPages = len(Spacecraft) / *pageSize
+	result.TotalElements = len(Spacecraft)
 	if high >= len(Spacecraft) {
-		result = Spacecraft[low:]
+		result.NumberOfElements = len(Spacecraft[low:])
+		result.Data = Spacecraft[low:]
 	} else {
-		result = Spacecraft[low:high]
+		result.Data = Spacecraft[low:high]
 	}
 	data, err := json.MarshalIndent(result, "", "\t")
 	if err != nil {
