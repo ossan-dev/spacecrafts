@@ -44,6 +44,12 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
+	spacecraft, err := elastic.QuerySpacecraftByDocumentID(ctx, "spacecrafts", "1000")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
+	}
+	spacecraft.Print(os.Stdout)
 	/******************* Debug ****************************/
 	// if err := internal.WritespacecraftToFile("domain/spacecraft.json", spacecraft); err != nil {
 	// 	fmt.Println(fmt.Errorf("WritespacecraftToFile() err: %v", err))

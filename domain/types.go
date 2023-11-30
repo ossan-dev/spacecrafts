@@ -1,5 +1,11 @@
 package domain
 
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+)
+
 /****************************************************/
 /************* Internal for Context *****************/
 /****************************************************/
@@ -26,9 +32,14 @@ type Spacecraft struct {
 	Registry        string          `json:"registry"`
 	Status          string          `json:"status"`
 	DateStatus      string          `json:"dateStatus"`
-	SpacecraftClass *SpacecraftInfo `json:"spacecraftClass"`
-	Owner           *SpacecraftInfo `json:"owner"`
-	Operator        *SpacecraftInfo `json:"operator"`
+	SpacecraftClass *SpacecraftInfo `json:"spacecraftClass,omitempty"`
+	Owner           *SpacecraftInfo `json:"owner,omitempty"`
+	Operator        *SpacecraftInfo `json:"operator,omitempty"`
+}
+
+func (s Spacecraft) Print(fs io.Writer) {
+	data, _ := json.MarshalIndent(s, "", "\t")
+	fmt.Fprintln(fs, string(data))
 }
 
 type SpacecraftWrapper struct {
@@ -38,4 +49,14 @@ type SpacecraftWrapper struct {
 	TotalPages       int           `json:"totalPages"`
 	TotalElements    int           `json:"totalElements"`
 	Data             []*Spacecraft `json:"data"`
+}
+
+/****************************************************/
+/************* Elasticsearch Types ******************/
+/****************************************************/
+type LookupResponse struct {
+	Index   string      `json:"_index"`
+	ID      string      `json:"id"`
+	Version int         `json:"_version"`
+	Source  *Spacecraft `json:"_source"`
 }
