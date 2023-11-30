@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"os"
 
-	"spacecraft/domain"
-	"spacecraft/logic"
+	"spacecraft/logic/elastic"
+	"spacecraft/logic/webclient"
 )
 
-// docker run -p 9200:9200 -it -m 1GB docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+// docker-compose up
 // go run . -mode=sync
 func main() {
 	ctx := context.Background()
@@ -16,22 +18,32 @@ func main() {
 	modePtr := flag.String("mode", "mode", `specify how to run the program ("sync" or "async"). The latter is the default"`)
 	flag.Parse()
 	if modePtr != nil && *modePtr == "sync" {
-		ctx, err = logic.Loadspacecraft(ctx)
+		ctx, err = webclient.Loadspacecraft(ctx)
 	} else {
-		ctx, err = logic.LoadspacecraftAsync(ctx)
+		ctx, err = webclient.LoadspacecraftAsync(ctx)
 	}
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
 	}
-	spacecraft := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
-	if spacecraft == nil {
-		panic("no spacecraft in context")
-	}
-	ctx = logic.ConnectWithElasticSearch(ctx)
+	ctx, err = elastic.ConnectWithElasticSearch(ctx)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
 	}
-	_ = ctx
+	if err = elastic.DeleteIndex(ctx, "spacecrafts"); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
+	}
+	/******************* Not use this version ************/
+	// if err = logic.IndexSpacecraftAsDocuments(ctx); err != nil {
+	// 	fmt.Fprintln(os.Stderr, err.Error())
+	// 	return
+	// }
+	if err = elastic.IndexSpacecraftAsDocumentsAsync(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
+	}
 	/******************* Debug ****************************/
 	// if err := internal.WritespacecraftToFile("domain/spacecraft.json", spacecraft); err != nil {
 	// 	fmt.Println(fmt.Errorf("WritespacecraftToFile() err: %v", err))

@@ -21,14 +21,14 @@ type SpacecraftInfo struct {
 }
 
 type Spacecraft struct {
-	Uid             string                 `json:"uid"`
-	Name            string                 `json:"name"`
-	Registry        string                 `json:"registry"`
-	Status          string                 `json:"status"`
-	DateStatus      string                 `json:"dateStatus"`
-	SpacecraftClass *SpacecraftInfo        `json:"spacecraftClass"`
-	Owner           *SpacecraftInfo        `json:"owner"`
-	Operator        map[string]interface{} `json:"operator"`
+	Uid             string          `json:"uid"`
+	Name            string          `json:"name"`
+	Registry        string          `json:"registry"`
+	Status          string          `json:"status"`
+	DateStatus      string          `json:"dateStatus"`
+	SpacecraftClass *SpacecraftInfo `json:"spacecraftClass"`
+	Owner           *SpacecraftInfo `json:"owner"`
+	Operator        *SpacecraftInfo `json:"operator"`
 }
 
 type SpacecraftWrapper struct {
