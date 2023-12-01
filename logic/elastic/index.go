@@ -54,6 +54,7 @@ func DeleteIndex(ctx context.Context, indexName string) error {
 	return nil
 }
 
+// FIXME: understand how to wait for all of the data to be indexed
 func IndexSpacecraftAsDocumentsAsync(ctx context.Context) error {
 	spacecrafts := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
 	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
@@ -62,6 +63,7 @@ func IndexSpacecraftAsDocumentsAsync(ctx context.Context) error {
 		Index:      "spacecrafts",
 		Client:     client,
 		NumWorkers: 5,
+		Refresh:    "wait_for",
 	})
 	if err != nil {
 		return fmt.Errorf("err while creating bulk indexer: %v", err)
