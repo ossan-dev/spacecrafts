@@ -37,6 +37,7 @@ type Spacecraft struct {
 	Operator        *SpacecraftInfo `json:"operator,omitempty"`
 }
 
+// Major: use String() instead
 func (s Spacecraft) Print(fs io.Writer) {
 	data, _ := json.MarshalIndent(s, "", "\t")
 	fmt.Fprintln(fs, string(data))
@@ -50,6 +51,8 @@ type SpacecraftWrapper struct {
 	TotalElements    int           `json:"totalElements"`
 	Data             []*Spacecraft `json:"data"`
 }
+
+// nit: split the "domain" in subpackages
 
 /****************************************************/
 /************* Elasticsearch Types ******************/

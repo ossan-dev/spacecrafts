@@ -39,19 +39,24 @@ func TestLoadspacecraftFromFile(t *testing.T) {
 				},
 			},
 		}
+		// Minor: you have the spacecraft.json file, why don't use it instead of mashalling `spacecraft`
+		// write it on a file etc?
 		data, err := json.Marshal(&spacecraft)
 		require.NoError(t, err)
+
+		// NIT: consider using temp files: https://pkg.go.dev/os#CreateTemp
 		filepath := "test_spacecraft.json"
 		err = os.WriteFile(filepath, data, os.ModePerm)
 		require.NoError(t, err)
 		defer func() {
 			err = os.Remove(filepath)
-			require.NoError(t, err)
+			require.NoError(t, err) //nit: not needed to check for this err in test
 		}()
+
 		// Act
 		res, err := store.LoadspacecraftFromFile(filepath)
 		// Assert
-		require.NotNil(t, res)
+		require.NotNil(t, res) // not needed: already have `assert.Equal(t, len(spacecraft), len(res))`
 		require.Nil(t, err)
 		assert.Equal(t, len(spacecraft), len(res))
 	})
@@ -61,6 +66,7 @@ func TestLoadspacecraftFromFile(t *testing.T) {
 		res, err := store.LoadspacecraftFromFile("unknown_spacecraft.json")
 		// Assert
 		require.Nil(t, res)
+		// Minor: use assert.ErrorContains(t,err, "err while opening file") instead of the below ones
 		require.NotNil(t, err)
 		assert.Contains(t, err.Error(), "err while opening file")
 	})

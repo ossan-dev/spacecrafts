@@ -18,6 +18,9 @@ func main() {
 	modePtr := flag.String("mode", "async", `specify how to run the program ("sync" or "async"). The latter is the default"`)
 	noBulkPtr := flag.Bool("nobulk", false, "specify whether to index data sync or async in elasticsearch")
 	flag.Parse()
+
+	// nit: split line 24 to 52 in its own setUp() function
+
 	if modePtr != nil && *modePtr == "sync" {
 		ctx, err = webclient.Loadspacecraft(ctx)
 	} else {
@@ -47,10 +50,13 @@ func main() {
 			return
 		}
 	}
+
 	for {
+		// nit: use multi-line strings (with backticks) for long text. Also make the text a constant.
 		fmt.Fprintln(os.Stdout, "What do you want to do?\n1. Lookup spacecraft by DocumentID.\n2. Search spacecraft by status and use UID prefix for relevance.\n3. Quit")
+
 		var userSelection string
-		fmt.Fscan(os.Stdin, &userSelection)
+		fmt.Fscan(os.Stdin, &userSelection) //nit: what about using fmt.Scanln() in main.go ? Same for all others Fscan
 		switch userSelection {
 		case "1":
 			var documentID string
@@ -58,10 +64,10 @@ func main() {
 			fmt.Fscan(os.Stdin, &documentID)
 			spacecraft, err := elastic.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
+				fmt.Fprintln(os.Stderr, err.Error()) //nit: log.Fatal() ?
 				return
 			}
-			spacecraft.Print(os.Stdout)
+			spacecraft.Print(os.Stdout) // major: define String() on spacecraft and simply fmt.Println(spacecraft)
 		case "2":
 			var uidPrefix string
 			fmt.Fprintln(os.Stdout, "type in the UID prefix:")
@@ -71,7 +77,7 @@ func main() {
 			fmt.Fscan(os.Stdin, &status)
 			destroyedSpacecraft, count, err := elastic.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
+				fmt.Fprintln(os.Stderr, err.Error()) //nit: log.Fatal() ?
 				return
 			}
 			fmt.Println("count:", count)
@@ -82,6 +88,7 @@ func main() {
 		case "3":
 			os.Exit(0)
 		}
+		// missing default case
 	}
 	/******************* Debug ****************************/
 	// if err := internal.WritespacecraftToFile("domain/spacecraft.json", spacecraft); err != nil {
