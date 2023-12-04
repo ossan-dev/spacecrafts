@@ -11,15 +11,17 @@ import (
 
 func main() {
 	var err error
-	handlers.Spacecraft, err = store.LoadspacecraftFromFile("spacecraft.json")
+	handlers.Spacecraft, err = store.LoadSpacecraftFromFile("spacecraft.json")
 	if err != nil {
 		// nit: why don't use log/slog package? explicit writer here in main.go is not needed (main can't be tested)
+		// [x]: switch to log
 		fmt.Fprintf(os.Stderr, "err while fetching spacecraft: %v", err)
 		return
 	}
 	r := http.NewServeMux()
-	r.HandleFunc("/spacecraft", handlers.Getspacecraft)
+	r.HandleFunc("/spacecraft", handlers.GetSpacecraft)
 	// nit:
+	// [x]: check return values of log.Fatal (it might write `nil` on the shell)
 	// use log.Fatal(http.ListenAndServe(":7000", r)) to save few lines and be more idiomatic
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to launch web server: %v", err)

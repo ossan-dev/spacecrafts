@@ -19,7 +19,7 @@ type Client struct {
 const getSpacecraftOp = "/spacecraft"
 
 // Load fetch all pages from the server using getSpacecraftOp.
-// todo: this might be done with ES Limit and Offset to just select a portion of the elements in the index
+// TODO: this might be done with ES Limit and Offset to just select a portion of the elements in the index
 func (c Client) Load(ctx context.Context) ([]*domain.Spacecraft, error) {
 	var (
 		out  []*domain.Spacecraft

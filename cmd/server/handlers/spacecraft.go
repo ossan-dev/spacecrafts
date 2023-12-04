@@ -56,8 +56,7 @@ func extractIntQueryParam(r *http.Request, paramName string, defaultValue int) (
 	return &result, nil
 }
 
-// Getspacecraft major: naming convention: should be GetSpacecraft
-func Getspacecraft(w http.ResponseWriter, r *http.Request) {
+func GetSpacecraft(w http.ResponseWriter, r *http.Request) {
 	pageSize, err := extractIntQueryParam(r, "pageSize", 100)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -71,6 +70,7 @@ func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// [x]: move to a separate func
 	// suggestion:
 	// code below is hard to read: extract in its own function
 	// increases clarity and allows domain logic testing.
@@ -80,6 +80,7 @@ func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 	// see comments on Spacecraft above.
 	low := *pageNumber * *pageSize
 	high := low + *pageSize
+	// add the GET method in a "dao" layer
 	var result domain.SpacecraftWrapper
 	result.PageNumber = *pageNumber
 	result.PageSize = *pageSize
@@ -99,6 +100,6 @@ func Getspacecraft(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	time.Sleep(2 * time.Second) // why? debug leftover ?
-	w.Write([]byte(data))       // no need to cast []byte()
+	time.Sleep(time.Second)
+	w.Write(data)
 }

@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.21 AS builder
 
 RUN mkdir /app
 ADD . /app
@@ -13,7 +13,12 @@ COPY spacecraft.json .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /webserver .
 
-# nit: use multistage builds for prod images:
-# https://docs.bitnami.com/tutorials/optimize-docker-images-multistage-builds/
+FROM bitnami/minideb:stretch
+
+RUN mkdir -p /app
+WORKDIR /app
+
+COPY --from=builder ./app/spacecraft.json .
+COPY --from=builder /webserver /
 
 CMD [ "/webserver" ]

@@ -17,14 +17,15 @@ import (
 
 func TestGetspacecraft(t *testing.T) {
 	var err error
+	// [x]: fix it
 	// bug: the  "../store/spacecraft.json" path is wrong.
 	// also best to create a testdata folder under handlers to store the  spacecraft.json `fixture file`
 	// see for example: https://dave.cheney.net/2016/05/10/test-fixtures-in-go
-	handlers.Spacecraft, err = store.LoadspacecraftFromFile("../../../spacecraft.json")
+	handlers.Spacecraft, err = store.LoadSpacecraftFromFile("../../../spacecraft.json")
 	require.NoError(t, err)
 
 	srv := http.NewServeMux()
-	srv.HandleFunc("/spacecraft", handlers.Getspacecraft)
+	srv.HandleFunc("/spacecraft", handlers.GetSpacecraft)
 	testSuite := []struct {
 		name               string
 		url                string

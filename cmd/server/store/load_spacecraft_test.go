@@ -39,6 +39,7 @@ func TestLoadspacecraftFromFile(t *testing.T) {
 				},
 			},
 		}
+		// [x]: use the actual spacecraft.json file instead of the newly-created one
 		// Minor: you have the spacecraft.json file, why don't use it instead of mashalling `spacecraft`
 		// write it on a file etc?
 		data, err := json.Marshal(&spacecraft)
@@ -50,12 +51,13 @@ func TestLoadspacecraftFromFile(t *testing.T) {
 		require.NoError(t, err)
 		defer func() {
 			err = os.Remove(filepath)
-			require.NoError(t, err) //nit: not needed to check for this err in test
+			require.NoError(t, err) // nit: not needed to check for this err in test
 		}()
 
 		// Act
-		res, err := store.LoadspacecraftFromFile(filepath)
+		res, err := store.LoadSpacecraftFromFile(filepath)
 		// Assert
+		// [x]: remove this usless check and switch assert.Equal to require.Len
 		require.NotNil(t, res) // not needed: already have `assert.Equal(t, len(spacecraft), len(res))`
 		require.Nil(t, err)
 		assert.Equal(t, len(spacecraft), len(res))
@@ -63,10 +65,11 @@ func TestLoadspacecraftFromFile(t *testing.T) {
 	t.Run("non existent file", func(t *testing.T) {
 		// Arrange
 		// Act
-		res, err := store.LoadspacecraftFromFile("unknown_spacecraft.json")
+		res, err := store.LoadSpacecraftFromFile("unknown_spacecraft.json")
 		// Assert
 		require.Nil(t, res)
-		// Minor: use assert.ErrorContains(t,err, "err while opening file") instead of the below ones
+		// [x]: switch to the function
+		// Minor: usre assert.ErrorContains(t, err, "err while opening file") instead of the below ones
 		require.NotNil(t, err)
 		assert.Contains(t, err.Error(), "err while opening file")
 	})

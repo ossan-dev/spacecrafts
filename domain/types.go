@@ -52,6 +52,7 @@ type SpacecraftWrapper struct {
 	Data             []*Spacecraft `json:"data"`
 }
 
+// [x]: split between multiple files
 // nit: split the "domain" in subpackages
 
 /****************************************************/
