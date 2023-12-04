@@ -21,7 +21,7 @@ func main() {
 	r.HandleFunc("/spacecraft", handlers.Getspacecraft)
 	// nit:
 	// use log.Fatal(http.ListenAndServe(":7000", r)) to save few lines and be more idiomatic
-	if err := http.ListenAndServe(":7000", r); err != nil {
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to launch web server: %v", err)
 		return
 	}
