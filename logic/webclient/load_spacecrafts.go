@@ -10,6 +10,12 @@ import (
 	"spacecraft/domain"
 )
 
+// I think the intent of this file is to have a client for the server in cmd/server.
+// iI the APIs are developed with OpenAPI spec you can try to generate a client via codgen
+// https://github.com/deepmap/oapi-codegen
+// but in case you need a handcrafted one, I'd be prone to use an approach like the client.go file
+// added in the pkg webclient
+
 func Fetchspacecraft(url string) ([]*domain.Spacecraft, error) {
 	res, err := http.Get(url)
 	if err != nil {

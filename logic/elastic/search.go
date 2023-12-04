@@ -41,7 +41,7 @@ func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status st
 		client.Search.WithIndex(index),
 		client.Search.WithBody(&searchBuffer),
 		client.Search.WithTrackTotalHits(true),
-		client.Search.WithSize(30),
+		client.Search.WithSize(30), // this should come from pageSize
 		client.Search.WithPretty(),
 	)
 	if err != nil {
@@ -60,7 +60,7 @@ func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status st
 		return nil, 0, fmt.Errorf("err while unmarshaling data: %v", err)
 	}
 	count = searchRes.Hits.Total.Value
-	if searchRes.Hits.Total.Value > 0 {
+	if searchRes.Hits.Total.Value > 0 { //nit: early return if searchRes.Hits.Total.Value == 0
 		for _, v := range searchRes.Hits.Hits {
 			res = append(res, v.Source)
 		}
