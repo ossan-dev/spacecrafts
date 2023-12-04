@@ -13,4 +13,7 @@ COPY spacecraft.json .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /webserver .
 
+# nit: use multistage builds for prod images:
+# https://docs.bitnami.com/tutorials/optimize-docker-images-multistage-builds/
+
 CMD [ "/webserver" ]

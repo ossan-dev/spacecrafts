@@ -11,8 +11,10 @@ import (
 	"spacecraft/domain"
 )
 
+// can be: var errChan = make(chan error)
 var errChan chan error = make(chan error)
 
+// ch can be a chan []*domain.Spacecraft, so you don't need the FOR at line 31
 func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacecraft) {
 	fmt.Println(url)
 	defer wg.Done()
@@ -39,6 +41,7 @@ func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacec
 	}
 }
 
+// refactor it similarly to the sequantial version in client.go
 func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
@@ -68,9 +71,16 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 		wg.Add(1)
 		go FetchspacecraftAsync(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i), &wg, ch)
 	}
+	// nit: possibly, to make it really parallel this should be written as
+	// otherwise the async blocks until all the Get request are completed
+	// go func() {
+	//	wg.Wait()
+	//	close(ch)
+	//}
 	wg.Wait()
 	close(ch)
-	select {
+	select { // not sure if this select here is needed...err can be checked differently or using a errGroup
+	// https://pkg.go.dev/golang.org/x/sync/errgroup
 	case err = <-errChan:
 		return ctx, err
 	default:
