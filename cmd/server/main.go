@@ -18,7 +18,7 @@ func main() {
 	}
 	r := http.NewServeMux()
 	r.HandleFunc("/spacecraft", handlers.Getspacecraft)
-	if err := http.ListenAndServe(":7000", r); err != nil {
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to launch web server: %v", err)
 		return
 	}

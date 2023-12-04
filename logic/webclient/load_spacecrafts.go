@@ -28,13 +28,13 @@ func Fetchspacecraft(url string) ([]*domain.Spacecraft, error) {
 	return spacecraft, nil
 }
 
-func Loadspacecraft(ctx context.Context) (context.Context, error) {
+func Loadspacecraft(ctx context.Context, url string) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
 		elapsedTime := time.Since(startTime)
 		fmt.Println("Loadspacecraft() took", elapsedTime)
 	}()
-	res, err := http.Get("http://localhost:8080/spacecraft?pageNumber=0&pageSize=100")
+	res, err := http.Get(fmt.Sprintf("%v/spacecraft?pageNumber=0&pageSize=100", url))
 	if err != nil {
 		return ctx, err
 	}
@@ -52,7 +52,7 @@ func Loadspacecraft(ctx context.Context) (context.Context, error) {
 	}
 	spacecraft = append(spacecraft, spacecraftWrapper.Data...)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
-		newSpacrafts, err := Fetchspacecraft(fmt.Sprintf("http://localhost:8080/spacecraft?pageNumber=%d&pageSize=100", i))
+		newSpacrafts, err := Fetchspacecraft(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i))
 		if err != nil {
 			return ctx, err
 		}

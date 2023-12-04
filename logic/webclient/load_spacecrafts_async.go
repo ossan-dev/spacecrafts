@@ -39,13 +39,13 @@ func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacec
 	}
 }
 
-func LoadspacecraftAsync(ctx context.Context) (context.Context, error) {
+func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
 		elapsedTime := time.Since(startTime)
 		fmt.Println("LoadspacecraftAsync() took", elapsedTime)
 	}()
-	res, err := http.Get("http://localhost:8080/spacecraft?pageNumber=0&pageSize=100")
+	res, err := http.Get(fmt.Sprintf("%v/spacecraft?pageNumber=0&pageSize=100", url))
 	if err != nil {
 		return ctx, err
 	}
@@ -66,7 +66,7 @@ func LoadspacecraftAsync(ctx context.Context) (context.Context, error) {
 	ch := make(chan *domain.Spacecraft, spacecraftWrapper.TotalElements)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
 		wg.Add(1)
-		go FetchspacecraftAsync(fmt.Sprintf("http://localhost:8080/spacecraft?pageNumber=%d&pageSize=100", i), &wg, ch)
+		go FetchspacecraftAsync(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i), &wg, ch)
 	}
 	wg.Wait()
 	close(ch)

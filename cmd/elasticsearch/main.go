@@ -19,9 +19,9 @@ func main() {
 	noBulkPtr := flag.Bool("nobulk", false, "specify whether to index data sync or async in elasticsearch")
 	flag.Parse()
 	if modePtr != nil && *modePtr == "sync" {
-		ctx, err = webclient.Loadspacecraft(ctx)
+		ctx, err = webclient.Loadspacecraft(ctx, "http://localhost:8080")
 	} else {
-		ctx, err = webclient.LoadspacecraftAsync(ctx)
+		ctx, err = webclient.LoadspacecraftAsync(ctx, "http://localhost:8080")
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
