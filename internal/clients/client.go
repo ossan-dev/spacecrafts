@@ -1,4 +1,4 @@
-package webclient
+package clients
 
 import (
 	"context"
@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 )
 
 // Client is a quick refactoring of the LoadSpacecraft sequential function.
 type Client struct {
-	base   string // eg http://localhost:7000/
-	client *http.Client
+	// FIXME: expose a constructor
+	Base   string // eg http://localhost:7000/
+	Client *http.Client
 }
 
 const getSpacecraftOp = "/spacecraft"
@@ -27,7 +28,7 @@ func (c Client) Load(ctx context.Context) ([]*domain.Spacecraft, error) {
 	)
 
 	for {
-		url := fmt.Sprintf("%s%s?pageNumber=%d&pageSize=100", c.base, getSpacecraftOp, page)
+		url := fmt.Sprintf("%s%s?pageNumber=%d&pageSize=100", c.Base, getSpacecraftOp, page)
 		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 		var spacecraftWrapper domain.SpacecraftWrapper
@@ -52,7 +53,7 @@ func (c Client) do(req *http.Request, out interface{}) error {
 		return fmt.Errorf("out interface can't be nil")
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("when performing request: %w ", err)
 	}

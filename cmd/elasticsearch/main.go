@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"spacecraft/internal/clients"
 	"spacecraft/logic/elastic"
-	"spacecraft/logic/webclient"
 )
 
 // docker-compose up
@@ -22,9 +22,9 @@ func main() {
 	// nit: split line 24 to 52 in its own setUp() function
 
 	if modePtr != nil && *modePtr == "sync" {
-		ctx, err = webclient.Loadspacecraft(ctx, "http://localhost:8080")
+		ctx, err = clients.Loadspacecraft(ctx, "http://localhost:8080")
 	} else {
-		ctx, err = webclient.LoadspacecraftAsync(ctx, "http://localhost:8080")
+		ctx, err = clients.LoadspacecraftAsync(ctx, "http://localhost:8080")
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

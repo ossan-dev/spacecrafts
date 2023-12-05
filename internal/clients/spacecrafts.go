@@ -1,4 +1,4 @@
-package webclient
+package clients
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 )
 
 // I think the intent of this file is to have a client for the server in cmd/server.

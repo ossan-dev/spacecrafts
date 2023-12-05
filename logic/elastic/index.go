@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esutil"

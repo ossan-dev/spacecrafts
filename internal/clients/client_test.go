@@ -1,4 +1,4 @@
-package webclient
+package clients_test
 
 import (
 	"context"
@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"spacecraft/domain"
+	"spacecraft/internal/clients"
+	"spacecraft/internal/domain"
 )
 
 func TestClient_Load(t *testing.T) {
-
 	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Get Request: ", r.URL)
 		pageN, e := strconv.Atoi(r.URL.Query().Get("pageNumber"))
@@ -40,9 +40,9 @@ func TestClient_Load(t *testing.T) {
 	}))
 	defer api.Close()
 
-	c := Client{
-		base:   api.URL,
-		client: api.Client(),
+	c := clients.Client{
+		Base:   api.URL,
+		Client: api.Client(),
 	}
 
 	sp, err := c.Load(context.Background())

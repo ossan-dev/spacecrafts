@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )

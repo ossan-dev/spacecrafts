@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )
@@ -60,7 +60,7 @@ func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status st
 		return nil, 0, fmt.Errorf("err while unmarshaling data: %v", err)
 	}
 	count = searchRes.Hits.Total.Value
-	if searchRes.Hits.Total.Value > 0 { //nit: early return if searchRes.Hits.Total.Value == 0
+	if searchRes.Hits.Total.Value > 0 { // nit: early return if searchRes.Hits.Total.Value == 0
 		for _, v := range searchRes.Hits.Hits {
 			res = append(res, v.Source)
 		}

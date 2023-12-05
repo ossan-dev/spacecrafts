@@ -1,4 +1,4 @@
-package webclient
+package clients
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 )
 
 // can be: var errChan = make(chan error)

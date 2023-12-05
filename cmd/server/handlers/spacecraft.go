@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"spacecraft/domain"
+	"spacecraft/internal/domain"
 )
 
 // Opinion:
