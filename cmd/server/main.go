@@ -1,17 +1,27 @@
 package main
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 
 	"spacecraft/cmd/server/handlers"
-	"spacecraft/cmd/server/store"
+	"spacecraft/domain"
 )
 
+//go:embed store/spacecraft.json
+var data []byte
+
 func main() {
+	var res []*domain.Spacecraft
 	var err error
-	handlers.Spacecraft, err = store.LoadSpacecraftFromFile("spacecraft.json")
+	if err := json.Unmarshal(data, &res); err != nil {
+		fmt.Fprintf(os.Stderr, "err while unmarshaling file: %v", err)
+		return
+	}
+	handlers.Spacecraft = res
 	if err != nil {
 		// nit: why don't use log/slog package? explicit writer here in main.go is not needed (main can't be tested)
 		// [x]: switch to log
