@@ -25,7 +25,7 @@ func (s *ITSuite) SetupSuite() {
 			Context: "../",
 		},
 		ExposedPorts: []string{"8080/tcp"},
-		WaitingFor:   wait.ForExec([]string{"/webserver"}),
+		WaitingFor:   wait.ForExposedPort(),
 	}
 	s.Container, err = testcontainers.GenericContainer(
 		s.Ctx,

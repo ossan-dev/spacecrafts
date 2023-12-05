@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"spacecraft/cmd/server/handlers"
+	"spacecraft/internal/handlers"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

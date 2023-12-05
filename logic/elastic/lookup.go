@@ -12,6 +12,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
+// FIXME: move below "internal"
 // nit: QuerySpacecraftByDocumentID it' s tecnically a GetByID, as no ES Search is performed.
 // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html
 func QuerySpacecraftByDocumentID(ctx context.Context, index, documentID string) (*domain.Spacecraft, error) {

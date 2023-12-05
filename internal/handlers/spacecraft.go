@@ -10,23 +10,6 @@ import (
 	"spacecraft/internal/domain"
 )
 
-// Opinion:
-// I suspect you got influenced by the  DDD approach of Damiano Petro Ungaro.
-// While I respect the choice - and in principle there is nothing wrong with it -
-// I personally suggest to keep the "infra" packages inside the `internal/` folder,
-// just defined inside their respective packages, eg:
-//   spacecraft/
-//     cmd/
-//       server/
-//         main.go
-//     internal/
-//	     handlers/
-//         ...files.go...
-//	     store/
-//         ...files.go...
-// while the cmd/server can contain just the
-// main.go which glues all the subpackages from `internal/`
-
 // Spacecraft ...
 // (suspected) major: having Spacecraft like this is race prone.
 // What about wrapping spacecraft with an accessor or a struct?

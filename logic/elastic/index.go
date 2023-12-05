@@ -16,6 +16,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esutil"
 )
 
+// FIXME: move below "internal"
 func IndexSpacecraftAsDocuments(ctx context.Context) error {
 	// Major: do not store non-scoped request "objects" in the context.
 	//  I want to explicitly state that context.Value() should NEVER be used for values that are not created and destroyed

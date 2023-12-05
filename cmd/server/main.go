@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"spacecraft/cmd/server/handlers"
+	"spacecraft/internal/handlers"
 )
 
-//go:embed store/spacecraft.json
+//go:embed spacecraft.json
 var data []byte
 
 func main() {

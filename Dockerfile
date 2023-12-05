@@ -10,7 +10,7 @@ RUN go mod download
 RUN go mod verify
 
 COPY cmd/server/main.go ./main.go
-COPY cmd/server/store/spacecraft.json store/spacecraft.json
+COPY cmd/server/spacecraft.json spacecraft.json
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /webserver .
 
