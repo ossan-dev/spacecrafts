@@ -10,19 +10,6 @@ import (
 	"spacecraft/internal/domain"
 )
 
-// Spacecraft ...
-// (suspected) major: having Spacecraft like this is race prone.
-// What about wrapping spacecraft with an accessor or a struct?
-// `Accessor pattern` procvdes access to the global []*domain.Spacecraft via provide Get/Set pkg functions
-// by using a mutex (similar to the history object, see https://github.com/MyPublicProjects/term-calc/blob/main/internal/history/history.go#L11-L16).
-// Using a struct can work too:
-//
-//		type Spacecrafts stuct{
-//		 data  []*domain.Spacecraft
-//		 m     sync.Mutex
-//	}
-//
-// I understand that this `major` might not be an issue, given the single threaded nature of the program so far
 var Spacecraft []*domain.Spacecraft
 
 func extractIntQueryParam(r *http.Request, paramName string, defaultValue int) (*int, error) {
@@ -52,31 +39,7 @@ func GetSpacecraft(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-
-	// [x]: move to a separate func
-	// suggestion:
-	// code below is hard to read: extract in its own function
-	// increases clarity and allows domain logic testing.
-
-	// Also I don't feel it belongs to the handler portion of the code.
-	// it probably should be a "Getter" on the Spacecraft type,
-	// see comments on Spacecraft above.
-	low := *pageNumber * *pageSize
-	high := low + *pageSize
-	// add the GET method in a "dao" layer
-	var result domain.SpacecraftWrapper
-	result.PageNumber = *pageNumber
-	result.PageSize = *pageSize
-	result.NumberOfElements = *pageSize
-	result.TotalPages = (len(Spacecraft) / *pageSize) + 1
-	result.TotalElements = len(Spacecraft)
-	if high >= len(Spacecraft) {
-		result.NumberOfElements = len(Spacecraft[low:])
-		result.Data = Spacecraft[low:]
-	} else {
-		result.Data = Spacecraft[low:high]
-	}
-
+	result := domain.GetPaginatedSpacecrafts(Spacecraft, *pageSize, *pageNumber)
 	data, err := json.MarshalIndent(result, "", "\t")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
