@@ -13,23 +13,6 @@ import (
 
 var errChan = make(chan error)
 
-func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan []*domain.Spacecraft) {
-	fmt.Println(url)
-	defer wg.Done()
-	res, err := http.Get(url)
-	if err != nil {
-		errChan <- err
-		return
-	}
-	defer res.Body.Close()
-	var spacecraftWrapper domain.SpacecraftWrapper
-	if err := json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
-		errChan <- err
-		return
-	}
-	ch <- spacecraftWrapper.Data
-}
-
 // refactor it similarly to the sequantial version in client.go
 func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, error) {
 	startTime := time.Now()
@@ -58,7 +41,22 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 	ch := make(chan []*domain.Spacecraft, spacecraftWrapper.TotalElements)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
 		wg.Add(1)
-		go FetchspacecraftAsync(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i), &wg, ch)
+		go func(url string) {
+			fmt.Println(url)
+			defer wg.Done()
+			res, err := http.Get(url)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			defer res.Body.Close()
+			var spacecraftWrapper domain.SpacecraftWrapper
+			if err := json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
+				errChan <- err
+				return
+			}
+			ch <- spacecraftWrapper.Data
+		}(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i))
 	}
 	// nit: possibly, to make it really parallel this should be written as
 	// otherwise the async blocks until all the Get request are completed
