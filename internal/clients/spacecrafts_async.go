@@ -4,16 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"sync"
 	"time"
 
 	"spacecraft/internal/domain"
+
+	"golang.org/x/sync/errgroup"
 )
 
-var errChan = make(chan error)
-
-// refactor it similarly to the sequantial version in client.go
 func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, error) {
 	startTime := time.Now()
 	defer func() {
@@ -37,45 +36,51 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 		return ctx, fmt.Errorf("no spacecraft in the page")
 	}
 	spacecraft = append(spacecraft, spacecraftWrapper.Data...)
-	var wg sync.WaitGroup
+	group, gctx := errgroup.WithContext(ctx)
 	ch := make(chan []*domain.Spacecraft, spacecraftWrapper.TotalElements)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
-		wg.Add(1)
-		go func(url string) {
-			fmt.Println(url)
-			defer wg.Done()
-			res, err := http.Get(url)
-			if err != nil {
-				errChan <- err
-				return
+		routineUrl := fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i)
+		group.Go(func() error {
+			if err := fetchSpacecraft(gctx, routineUrl, ch); err != nil {
+				return err
 			}
-			defer res.Body.Close()
-			var spacecraftWrapper domain.SpacecraftWrapper
-			if err := json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
-				errChan <- err
-				return
-			}
-			ch <- spacecraftWrapper.Data
-		}(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i))
+			return nil
+		})
 	}
-	// nit: possibly, to make it really parallel this should be written as
-	// otherwise the async blocks until all the Get request are completed
-	// go func() {
-	//	wg.Wait()
-	//	close(ch)
-	//}
-	wg.Wait()
-	close(ch)
-	select { // not sure if this select here is needed...err can be checked differently or using a errGroup
-	// https://pkg.go.dev/golang.org/x/sync/errgroup
-	case err = <-errChan:
+	if err = group.Wait(); err != nil {
 		return ctx, err
-	default:
-		fmt.Println("no errors received!")
 	}
+	close(ch)
 	for msg := range ch {
 		spacecraft = append(spacecraft, msg...)
 	}
 	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
 	return ctx, nil
+}
+
+func fetchSpacecraft(ctx context.Context, url string, ch chan []*domain.Spacecraft) error {
+	select {
+	case <-ctx.Done():
+		return nil
+	default:
+		fmt.Println(url)
+		res, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+		if res.StatusCode < 200 || res.StatusCode > 299 {
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				return fmt.Errorf("err while parsing not positive answer: %v", err)
+			}
+			return fmt.Errorf("err fetching data: %v", string(body))
+		}
+		var spacecraftWrapper domain.SpacecraftWrapper
+		if err := json.NewDecoder(res.Body).Decode(&spacecraftWrapper); err != nil {
+			return err
+		}
+		ch <- spacecraftWrapper.Data
+		return nil
+	}
 }
