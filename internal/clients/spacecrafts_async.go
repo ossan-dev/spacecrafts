@@ -11,11 +11,9 @@ import (
 	"spacecraft/internal/domain"
 )
 
-// can be: var errChan = make(chan error)
-var errChan chan error = make(chan error)
+var errChan = make(chan error)
 
-// ch can be a chan []*domain.Spacecraft, so you don't need the FOR at line 31
-func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacecraft) {
+func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan []*domain.Spacecraft) {
 	fmt.Println(url)
 	defer wg.Done()
 	res, err := http.Get(url)
@@ -29,16 +27,7 @@ func FetchspacecraftAsync(url string, wg *sync.WaitGroup, ch chan *domain.Spacec
 		errChan <- err
 		return
 	}
-	for _, v := range spacecraftWrapper.Data {
-		select {
-		case err := <-errChan:
-			close(errChan)
-			fmt.Printf("err while fetching: %v", err)
-			return
-		default:
-			ch <- v
-		}
-	}
+	ch <- spacecraftWrapper.Data
 }
 
 // refactor it similarly to the sequantial version in client.go
@@ -66,7 +55,7 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 	}
 	spacecraft = append(spacecraft, spacecraftWrapper.Data...)
 	var wg sync.WaitGroup
-	ch := make(chan *domain.Spacecraft, spacecraftWrapper.TotalElements)
+	ch := make(chan []*domain.Spacecraft, spacecraftWrapper.TotalElements)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
 		wg.Add(1)
 		go FetchspacecraftAsync(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, i), &wg, ch)
@@ -87,7 +76,7 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 		fmt.Println("no errors received!")
 	}
 	for msg := range ch {
-		spacecraft = append(spacecraft, msg)
+		spacecraft = append(spacecraft, msg...)
 	}
 	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
 	return ctx, nil
