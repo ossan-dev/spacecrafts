@@ -40,10 +40,7 @@ func TestClient_Load(t *testing.T) {
 	}))
 	defer api.Close()
 
-	c := clients.Client{
-		Base:   api.URL,
-		Client: api.Client(),
-	}
+	c := clients.NewClient(api.URL, api.Client())
 
 	sp, err := c.Load(context.Background())
 	assert.NoError(t, err)

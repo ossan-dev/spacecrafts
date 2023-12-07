@@ -4,9 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 
 	"spacecraft/internal/clients"
+	"spacecraft/internal/domain"
 	"spacecraft/logic/elastic"
 )
 
@@ -22,7 +24,13 @@ func main() {
 	// nit: split line 24 to 52 in its own setUp() function
 
 	if modePtr != nil && *modePtr == "sync" {
-		ctx, err = clients.Loadspacecraft(ctx, "http://localhost:8080")
+		// ctx, err = clients.Loadspacecraft(ctx, "http://localhost:8080")
+		client := clients.NewClient("http://localhost:8080", &http.Client{})
+		spacecraft, err := client.Load(ctx)
+		if err == nil {
+			ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
+		}
+
 	} else {
 		ctx, err = clients.LoadspacecraftAsync(ctx, "http://localhost:8080")
 	}
