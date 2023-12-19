@@ -3,7 +3,7 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"os"
 )
 
 type SpacecraftInfo struct {
@@ -39,10 +39,9 @@ func GetPaginatedSpacecrafts(spacecrafts []*Spacecraft, pageSize, pageNumber int
 	return
 }
 
-// Major: use String() instead
-func (s Spacecraft) Print(fs io.Writer) {
+func (s Spacecraft) String() {
 	data, _ := json.MarshalIndent(s, "", "\t")
-	fmt.Fprintln(fs, string(data))
+	fmt.Fprintln(os.Stdout, string(data))
 }
 
 type SpacecraftWrapper struct {

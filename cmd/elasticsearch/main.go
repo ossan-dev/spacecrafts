@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -11,6 +12,13 @@ import (
 	"spacecraft/internal/domain"
 	"spacecraft/internal/es"
 )
+
+const userMenuOptions = `
+What do you want to do?
+
+1. Lookup spacecraft by DocumentID.
+2. Search spacecraft by status and use UID prefix for relevance.
+3. Quit`
 
 // docker-compose up
 // go run . -mode=sync -nobulk
@@ -21,10 +29,50 @@ func main() {
 	noBulkPtr := flag.Bool("nobulk", false, "specify whether to index data sync or async in elasticsearch")
 	flag.Parse()
 
-	// nit: split line 24 to 52 in its own setUp() function
+	ctx, err = setUp(ctx, modePtr, noBulkPtr)
+	if err != nil {
+		log.Fatalf("failed to set elasticsearch up: %v", err)
+	}
 
+	for {
+		fmt.Fprintln(os.Stdout, userMenuOptions)
+		var userSelection string
+		fmt.Fscanln(os.Stdin, &userSelection)
+		switch userSelection {
+		case "1":
+			var documentID string
+			fmt.Fprintln(os.Stdout, "type in the DocumentID:")
+			fmt.Fscanln(os.Stdin, &documentID)
+			spacecraft, err := es.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			spacecraft.String()
+		case "2":
+			var uidPrefix string
+			fmt.Fprintln(os.Stdout, "type in the UID prefix:")
+			fmt.Fscanln(os.Stdin, &uidPrefix)
+			var status string
+			fmt.Fprintln(os.Stdout, "type in the status:")
+			fmt.Fscanln(os.Stdin, &status)
+			destroyedSpacecraft, count, err := es.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("count:", count)
+			fmt.Println(len(destroyedSpacecraft))
+			for _, v := range destroyedSpacecraft {
+				v.String()
+			}
+		case "3":
+			os.Exit(0)
+		}
+	}
+}
+
+func setUp(ctx context.Context, modePtr *string, noBulkPtr *bool) (context.Context, error) {
+	var err error
 	if modePtr != nil && *modePtr == "sync" {
-		// ctx, err = clients.Loadspacecraft(ctx, "http://localhost:8080")
 		client := clients.NewClient("http://localhost:8080", &http.Client{})
 		spacecraft, err := client.Load(ctx)
 		if err == nil {
@@ -36,72 +84,27 @@ func main() {
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return
+		return ctx, err
 	}
 	ctx, err = es.Connect(ctx, "http://localhost:9200")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return
+		return ctx, err
 	}
 	if err = es.DeleteIndex(ctx, "spacecrafts"); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return
+		return ctx, err
 	}
 	if noBulkPtr != nil && *noBulkPtr {
 		if err = es.IndexSpacecraftAsDocuments(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
-			return
+			return ctx, err
 		}
 	} else {
 		if err = es.IndexSpacecraftAsDocumentsAsync(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
-			return
+			return ctx, err
 		}
 	}
-
-	for {
-		// nit: use multi-line strings (with backticks) for long text. Also make the text a constant.
-		fmt.Fprintln(os.Stdout, "What do you want to do?\n1. Lookup spacecraft by DocumentID.\n2. Search spacecraft by status and use UID prefix for relevance.\n3. Quit")
-
-		var userSelection string
-		fmt.Fscan(os.Stdin, &userSelection) // nit: what about using fmt.Scanln() in main.go ? Same for all others Fscan
-		switch userSelection {
-		case "1":
-			var documentID string
-			fmt.Fprintln(os.Stdout, "type in the DocumentID:")
-			fmt.Fscan(os.Stdin, &documentID)
-			spacecraft, err := es.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error()) // nit: log.Fatal() ?
-				return
-			}
-			spacecraft.Print(os.Stdout) // major: define String() on spacecraft and simply fmt.Println(spacecraft)
-		case "2":
-			var uidPrefix string
-			fmt.Fprintln(os.Stdout, "type in the UID prefix:")
-			fmt.Fscan(os.Stdin, &uidPrefix)
-			var status string
-			fmt.Fprintln(os.Stdout, "type in the status:")
-			fmt.Fscan(os.Stdin, &status)
-			destroyedSpacecraft, count, err := es.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error()) // nit: log.Fatal() ?
-				return
-			}
-			fmt.Println("count:", count)
-			fmt.Println(len(destroyedSpacecraft))
-			for _, v := range destroyedSpacecraft {
-				v.Print(os.Stdout)
-			}
-		case "3":
-			os.Exit(0)
-		}
-		// missing default case
-	}
-	/******************* Debug ****************************/
-	// if err := internal.WritespacecraftToFile("domain/spacecraft.json", spacecraft); err != nil {
-	// 	fmt.Println(fmt.Errorf("WritespacecraftToFile() err: %v", err))
-	// }
-	// internal.Printspacecraft(os.Stdout, spacecraft)
-	/******************* End of Debug ******************/
+	return ctx, nil
 }
