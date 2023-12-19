@@ -1,4 +1,4 @@
-package elastic
+package es
 
 import (
 	"bytes"
@@ -14,7 +14,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
-// FIXME: move below "internal"
 func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status string) (res []*domain.Spacecraft, count int, err error) {
 	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
 	var searchBuffer bytes.Buffer

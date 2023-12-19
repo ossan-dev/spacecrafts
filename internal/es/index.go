@@ -1,4 +1,4 @@
-package elastic
+package es
 
 import (
 	"context"
@@ -16,7 +16,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esutil"
 )
 
-// FIXME: move below "internal"
 func IndexSpacecraftAsDocuments(ctx context.Context) error {
 	// Major: do not store non-scoped request "objects" in the context.
 	//  I want to explicitly state that context.Value() should NEVER be used for values that are not created and destroyed
@@ -46,24 +45,20 @@ func IndexSpacecraftAsDocuments(ctx context.Context) error {
 func DeleteIndex(ctx context.Context, indexName string) error {
 	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
 
-	res, err := client.Indices.Exists([]string{indexName}) // nit: no need to perform an extra query to verify existence
+	res, err := client.Indices.Delete([]string{indexName})
 	if err != nil {
-		return fmt.Errorf("failed to get info for index %q with err: %v", indexName, err)
+		return fmt.Errorf("failed to delete index %q with err: %v", indexName, err)
 	}
-	// nit: early return on res.StatusCode == http.StatusNotFound: less nesting and more idiomatic
-	if res.StatusCode != http.StatusNotFound {
-		res, err := client.Indices.Delete([]string{indexName})
+	defer res.Body.Close()
+	if res.StatusCode == http.StatusNotFound {
+		return nil
+	}
+	if res.StatusCode != http.StatusOK {
+		data, err := io.ReadAll(res.Body)
 		if err != nil {
-			return fmt.Errorf("failed to delete index %q with err: %v", indexName, err)
+			return fmt.Errorf("err while reading response body: %v", err)
 		}
-		defer res.Body.Close()
-		if res.StatusCode != http.StatusOK {
-			data, err := io.ReadAll(res.Body)
-			if err != nil {
-				return fmt.Errorf("err while reading response body: %v", err)
-			}
-			return fmt.Errorf("failed to delete index %q with message: %v", indexName, string(data))
-		}
+		return fmt.Errorf("failed to delete index %q with message: %v", indexName, string(data))
 	}
 	return nil
 }

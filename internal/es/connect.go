@@ -1,4 +1,4 @@
-package elastic
+package es
 
 import (
 	"context"
@@ -9,12 +9,10 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
-// ConnectWithElasticSearch nit naming convention: can just be called Connect or Dial
 // major: should return an elasticsearch.Client?
-// FIXME: move below "internal"
-func ConnectWithElasticSearch(ctx context.Context) (context.Context, error) {
+func Connect(ctx context.Context, url string) (context.Context, error) {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"http://localhost:9200"}, // nit: allow to be passed in as a config param
+		Addresses: []string{url},
 	})
 	if err != nil {
 		return ctx, fmt.Errorf("failed to connect to elasticsearch: %v", err)

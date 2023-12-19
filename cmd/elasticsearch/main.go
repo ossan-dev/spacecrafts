@@ -9,7 +9,7 @@ import (
 
 	"spacecraft/internal/clients"
 	"spacecraft/internal/domain"
-	"spacecraft/logic/elastic"
+	"spacecraft/internal/es"
 )
 
 // docker-compose up
@@ -38,22 +38,22 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
-	ctx, err = elastic.ConnectWithElasticSearch(ctx)
+	ctx, err = es.Connect(ctx, "http://localhost:9200")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
-	if err = elastic.DeleteIndex(ctx, "spacecrafts"); err != nil {
+	if err = es.DeleteIndex(ctx, "spacecrafts"); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
 	if noBulkPtr != nil && *noBulkPtr {
-		if err = elastic.IndexSpacecraftAsDocuments(ctx); err != nil {
+		if err = es.IndexSpacecraftAsDocuments(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			return
 		}
 	} else {
-		if err = elastic.IndexSpacecraftAsDocumentsAsync(ctx); err != nil {
+		if err = es.IndexSpacecraftAsDocumentsAsync(ctx); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			return
 		}
@@ -70,7 +70,7 @@ func main() {
 			var documentID string
 			fmt.Fprintln(os.Stdout, "type in the DocumentID:")
 			fmt.Fscan(os.Stdin, &documentID)
-			spacecraft, err := elastic.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
+			spacecraft, err := es.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error()) // nit: log.Fatal() ?
 				return
@@ -83,7 +83,7 @@ func main() {
 			var status string
 			fmt.Fprintln(os.Stdout, "type in the status:")
 			fmt.Fscan(os.Stdin, &status)
-			destroyedSpacecraft, count, err := elastic.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
+			destroyedSpacecraft, count, err := es.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error()) // nit: log.Fatal() ?
 				return
