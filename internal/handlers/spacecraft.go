@@ -21,7 +21,7 @@ func extractIntQueryParam(r *http.Request, paramName string, defaultValue int) (
 	}
 	result, err := strconv.Atoi(rawParam)
 	if err != nil {
-		return nil, fmt.Errorf("err while fetching value from query string: %v", err)
+		return nil, fmt.Errorf("err while fetching value from query string: %w", err)
 	}
 	return &result, nil
 }

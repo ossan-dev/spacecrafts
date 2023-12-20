@@ -45,7 +45,7 @@ func main() {
 			var documentID string
 			fmt.Fprintln(os.Stdout, "type in the DocumentID:")
 			fmt.Fscanln(os.Stdin, &documentID)
-			spacecraft, err := es.QuerySpacecraftByDocumentID(esClient, "spacecrafts", documentID)
+			spacecraft, err := es.GetByID(esClient, "spacecrafts", documentID)
 			if err != nil {
 				log.Fatal(err)
 			}

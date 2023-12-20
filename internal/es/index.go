@@ -17,16 +17,6 @@ import (
 )
 
 func IndexSpacecraftAsDocuments(ctx context.Context, esClient *elasticsearch.Client) error {
-	// Major: do not store non-scoped request "objects" in the context.
-	//  I want to explicitly state that context.Value() should NEVER be used for values that are not created and destroyed
-	// during the lifetime of the request.
-	// You shouldn’t store a logger there if it isn’t created specifically to be scoped to this request,
-	// and likewise you shouldn’t store a generic database connection in a context value.
-	// see: https://www.calhoun.io/pitfalls-of-context-values-and-how-to-avoid-or-mitigate-them/
-	// or
-	// https://pkg.go.dev/context
-	// Package context defines the Context type, which carries deadlines, cancellation signals,
-	// and other request-scoped values across API boundaries and between processes.
 	spacecrafts, err := domain.GetSpacecraftsFromCtx(ctx)
 	if err != nil {
 		return err
@@ -44,7 +34,7 @@ func IndexSpacecraftAsDocuments(ctx context.Context, esClient *elasticsearch.Cli
 func DeleteIndex(esClient *elasticsearch.Client, indexName string) error {
 	res, err := esClient.Indices.Delete([]string{indexName})
 	if err != nil {
-		return fmt.Errorf("failed to delete index %q with err: %v", indexName, err)
+		return fmt.Errorf("failed to delete index %q with err: %w", indexName, err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {
@@ -53,7 +43,7 @@ func DeleteIndex(esClient *elasticsearch.Client, indexName string) error {
 	if res.StatusCode != http.StatusOK {
 		data, err := io.ReadAll(res.Body)
 		if err != nil {
-			return fmt.Errorf("err while reading response body: %v", err)
+			return fmt.Errorf("err while reading response body: %w", err)
 		}
 		return fmt.Errorf("failed to delete index %q with message: %v", indexName, string(data))
 	}
@@ -72,12 +62,12 @@ func IndexSpacecraftAsDocumentsAsync(ctx context.Context, esClient *elasticsearc
 		Refresh:    "wait_for",
 	})
 	if err != nil {
-		return fmt.Errorf("err while creating bulk indexer: %v", err)
+		return fmt.Errorf("err while creating bulk indexer: %w", err)
 	}
 	for spacecraftID, spacecraft := range spacecrafts {
 		data, err := json.Marshal(spacecraft)
 		if err != nil {
-			return fmt.Errorf("err while marshaling object: %v", spacecraft)
+			return fmt.Errorf("err while marshaling object: %w", err)
 		}
 		err = bulkIndexer.Add(ctx, esutil.BulkIndexerItem{
 			Action:     "index",
@@ -85,11 +75,11 @@ func IndexSpacecraftAsDocumentsAsync(ctx context.Context, esClient *elasticsearc
 			Body:       strings.NewReader(string(data)),
 		})
 		if err != nil {
-			return fmt.Errorf("failed to add %v to the bulk indexer: %v", spacecraft, err)
+			return fmt.Errorf("failed to add %v to the bulk indexer: %w", spacecraft, err)
 		}
 	}
 	if err = bulkIndexer.Close(ctx); err != nil {
-		return fmt.Errorf("failed to close the bulk indexer: %v", err)
+		return fmt.Errorf("failed to close the bulk indexer: %w", err)
 	}
 	stats := bulkIndexer.Stats()
 	fmt.Fprintf(os.Stdout, "Spacecrafts indexed on Elasticsearch: %d\n", stats.NumIndexed)

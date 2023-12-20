@@ -11,7 +11,7 @@ func Connect(url string) (*elasticsearch.Client, error) {
 		Addresses: []string{url},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to elasticsearch: %v", err)
+		return nil, fmt.Errorf("failed to connect to elasticsearch: %w", err)
 	}
 	return es, nil
 }

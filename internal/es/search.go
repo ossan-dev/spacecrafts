@@ -32,7 +32,7 @@ func SearchByStatusAndUidPrefix(esClient *elasticsearch.Client, index, uidPrefix
 		},
 	}
 	if err = json.NewEncoder(&searchBuffer).Encode(search); err != nil {
-		return nil, 0, fmt.Errorf("err while encoding the search req: %v", err)
+		return nil, 0, fmt.Errorf("err while encoding the search req: %w", err)
 	}
 	response, err := esClient.Search(
 		esClient.Search.WithIndex(index),
@@ -42,19 +42,19 @@ func SearchByStatusAndUidPrefix(esClient *elasticsearch.Client, index, uidPrefix
 		esClient.Search.WithPretty(),
 	)
 	if err != nil {
-		return nil, 0, fmt.Errorf("err while invoking elasticsearch: %v", err)
+		return nil, 0, fmt.Errorf("err while invoking elasticsearch: %w", err)
 	}
 	defer response.Body.Close()
 	data, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, 0, fmt.Errorf("err while reading response body: %v", err)
+		return nil, 0, fmt.Errorf("err while reading response body: %w", err)
 	}
 	if response.StatusCode != http.StatusOK {
-		return nil, 0, fmt.Errorf("unexpected elasticsearch err: %v", err)
+		return nil, 0, fmt.Errorf("unexpected elasticsearch err: %w", err)
 	}
 	var searchRes domain.SearchResponse
 	if err = json.Unmarshal(data, &searchRes); err != nil {
-		return nil, 0, fmt.Errorf("err while unmarshaling data: %v", err)
+		return nil, 0, fmt.Errorf("err while unmarshaling data: %w", err)
 	}
 	count = searchRes.Hits.Total.Value
 	if searchRes.Hits.Total.Value > 0 { // nit: early return if searchRes.Hits.Total.Value == 0

@@ -72,7 +72,7 @@ func fetchSpacecraft(ctx context.Context, url string, ch chan []*domain.Spacecra
 		if res.StatusCode < 200 || res.StatusCode > 299 {
 			body, err := io.ReadAll(res.Body)
 			if err != nil {
-				return fmt.Errorf("err while parsing not positive answer: %v", err)
+				return fmt.Errorf("err while parsing not positive answer: %w", err)
 			}
 			return fmt.Errorf("err fetching data: %v", string(body))
 		}
