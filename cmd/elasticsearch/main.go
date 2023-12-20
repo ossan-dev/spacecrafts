@@ -11,6 +11,8 @@ import (
 	"spacecraft/internal/clients"
 	"spacecraft/internal/domain"
 	"spacecraft/internal/es"
+
+	"github.com/elastic/go-elasticsearch/v8"
 )
 
 const userMenuOptions = `
@@ -29,7 +31,7 @@ func main() {
 	noBulkPtr := flag.Bool("nobulk", false, "specify whether to index data sync or async in elasticsearch")
 	flag.Parse()
 
-	ctx, err = setUp(ctx, modePtr, noBulkPtr)
+	esClient, err := setUp(ctx, modePtr, noBulkPtr)
 	if err != nil {
 		log.Fatalf("failed to set elasticsearch up: %v", err)
 	}
@@ -43,7 +45,7 @@ func main() {
 			var documentID string
 			fmt.Fprintln(os.Stdout, "type in the DocumentID:")
 			fmt.Fscanln(os.Stdin, &documentID)
-			spacecraft, err := es.QuerySpacecraftByDocumentID(ctx, "spacecrafts", documentID)
+			spacecraft, err := es.QuerySpacecraftByDocumentID(esClient, "spacecrafts", documentID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -55,7 +57,7 @@ func main() {
 			var status string
 			fmt.Fprintln(os.Stdout, "type in the status:")
 			fmt.Fscanln(os.Stdin, &status)
-			destroyedSpacecraft, count, err := es.SearchByStatusAndUidPrefix(ctx, "spacecrafts", uidPrefix, status)
+			destroyedSpacecraft, count, err := es.SearchByStatusAndUidPrefix(esClient, "spacecrafts", uidPrefix, status)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -70,13 +72,13 @@ func main() {
 	}
 }
 
-func setUp(ctx context.Context, modePtr *string, noBulkPtr *bool) (context.Context, error) {
+func setUp(ctx context.Context, modePtr *string, noBulkPtr *bool) (*elasticsearch.Client, error) {
 	var err error
 	if modePtr != nil && *modePtr == "sync" {
 		client := clients.NewClient("http://localhost:8080", &http.Client{})
-		spacecraft, err := client.Load(ctx)
+		spacecrafts, err := client.Load(ctx)
 		if err == nil {
-			ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
+			ctx = domain.WithSpacecrafts(ctx, spacecrafts)
 		}
 
 	} else {
@@ -84,27 +86,27 @@ func setUp(ctx context.Context, modePtr *string, noBulkPtr *bool) (context.Conte
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return ctx, err
+		return nil, err
 	}
-	ctx, err = es.Connect(ctx, "http://localhost:9200")
+	esClient, err := es.Connect("http://localhost:9200")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return ctx, err
+		return nil, err
 	}
-	if err = es.DeleteIndex(ctx, "spacecrafts"); err != nil {
+	if err = es.DeleteIndex(esClient, "spacecrafts"); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		return ctx, err
+		return nil, err
 	}
 	if noBulkPtr != nil && *noBulkPtr {
-		if err = es.IndexSpacecraftAsDocuments(ctx); err != nil {
+		if err = es.IndexSpacecraftAsDocuments(ctx, esClient); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
-			return ctx, err
+			return nil, err
 		}
 	} else {
-		if err = es.IndexSpacecraftAsDocumentsAsync(ctx); err != nil {
+		if err = es.IndexSpacecraftAsDocumentsAsync(ctx, esClient); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
-			return ctx, err
+			return nil, err
 		}
 	}
-	return ctx, nil
+	return esClient, nil
 }

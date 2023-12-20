@@ -1,7 +1,6 @@
 package es
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,9 +13,8 @@ import (
 
 // nit: QuerySpacecraftByDocumentID it' s tecnically a GetByID, as no ES Search is performed.
 // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html
-func QuerySpacecraftByDocumentID(ctx context.Context, index, documentID string) (*domain.Spacecraft, error) {
-	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
-	res, err := client.Get(index, documentID)
+func QuerySpacecraftByDocumentID(esClient *elasticsearch.Client, index, documentID string) (*domain.Spacecraft, error) {
+	res, err := esClient.Get(index, documentID)
 	if err != nil {
 		// major: should be %w to wrap an error in fmt.Errorf instead of %v? (same in other places)
 		return nil, fmt.Errorf("err while looking up the document with ID: %v with err: %v", documentID, err)

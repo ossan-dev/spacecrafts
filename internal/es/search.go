@@ -2,7 +2,6 @@ package es
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,8 +13,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
-func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status string) (res []*domain.Spacecraft, count int, err error) {
-	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
+func SearchByStatusAndUidPrefix(esClient *elasticsearch.Client, index, uidPrefix, status string) (res []*domain.Spacecraft, count int, err error) {
 	var searchBuffer bytes.Buffer
 	search := map[string]interface{}{
 		"query": map[string]interface{}{
@@ -36,13 +34,12 @@ func SearchByStatusAndUidPrefix(ctx context.Context, index, uidPrefix, status st
 	if err = json.NewEncoder(&searchBuffer).Encode(search); err != nil {
 		return nil, 0, fmt.Errorf("err while encoding the search req: %v", err)
 	}
-	response, err := client.Search(
-		client.Search.WithContext(ctx),
-		client.Search.WithIndex(index),
-		client.Search.WithBody(&searchBuffer),
-		client.Search.WithTrackTotalHits(true),
-		client.Search.WithSize(30), // this should come from pageSize
-		client.Search.WithPretty(),
+	response, err := esClient.Search(
+		esClient.Search.WithIndex(index),
+		esClient.Search.WithBody(&searchBuffer),
+		esClient.Search.WithTrackTotalHits(true),
+		esClient.Search.WithSize(30), // this should come from pageSize
+		esClient.Search.WithPretty(),
 	)
 	if err != nil {
 		return nil, 0, fmt.Errorf("err while invoking elasticsearch: %v", err)

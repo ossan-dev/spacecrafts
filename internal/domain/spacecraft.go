@@ -1,10 +1,27 @@
 package domain
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 )
+
+type spacecraftsCtxKeyType string
+
+const spacecraftsCtxKey spacecraftsCtxKeyType = "spacecrafts"
+
+func WithSpacecrafts(ctx context.Context, spacecrafts []*Spacecraft) context.Context {
+	return context.WithValue(ctx, spacecraftsCtxKey, spacecrafts)
+}
+
+func GetSpacecraftsFromCtx(ctx context.Context) ([]*Spacecraft, error) {
+	value, ok := ctx.Value(spacecraftsCtxKey).([]*Spacecraft)
+	if !ok {
+		return nil, fmt.Errorf("the key %q is either missing or set to a wrong value type", spacecraftsCtxKey)
+	}
+	return value, nil
+}
 
 type SpacecraftInfo struct {
 	Uid  string `json:"uid"`

@@ -31,11 +31,11 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 	if spacecraftWrapper.TotalPages == 0 {
 		return ctx, fmt.Errorf("empty resultset")
 	}
-	var spacecraft []*domain.Spacecraft
+	var spacecrafts []*domain.Spacecraft
 	if len(spacecraftWrapper.Data) == 0 {
 		return ctx, fmt.Errorf("no spacecraft in the page")
 	}
-	spacecraft = append(spacecraft, spacecraftWrapper.Data...)
+	spacecrafts = append(spacecrafts, spacecraftWrapper.Data...)
 	group, gctx := errgroup.WithContext(ctx)
 	ch := make(chan []*domain.Spacecraft, spacecraftWrapper.TotalElements)
 	for i := 1; i < spacecraftWrapper.TotalPages; i++ {
@@ -52,9 +52,9 @@ func LoadspacecraftAsync(ctx context.Context, url string) (context.Context, erro
 	}
 	close(ch)
 	for msg := range ch {
-		spacecraft = append(spacecraft, msg...)
+		spacecrafts = append(spacecrafts, msg...)
 	}
-	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
+	ctx = domain.WithSpacecrafts(ctx, spacecrafts)
 	return ctx, nil
 }
 

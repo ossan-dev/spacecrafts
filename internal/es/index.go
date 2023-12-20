@@ -16,7 +16,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esutil"
 )
 
-func IndexSpacecraftAsDocuments(ctx context.Context) error {
+func IndexSpacecraftAsDocuments(ctx context.Context, esClient *elasticsearch.Client) error {
 	// Major: do not store non-scoped request "objects" in the context.
 	//  I want to explicitly state that context.Value() should NEVER be used for values that are not created and destroyed
 	// during the lifetime of the request.
@@ -27,25 +27,22 @@ func IndexSpacecraftAsDocuments(ctx context.Context) error {
 	// https://pkg.go.dev/context
 	// Package context defines the Context type, which carries deadlines, cancellation signals,
 	// and other request-scoped values across API boundaries and between processes.
-	spacecrafts := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
-	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
-
+	spacecrafts, err := domain.GetSpacecraftsFromCtx(ctx)
+	if err != nil {
+		return err
+	}
 	for spacecraftID, spacecraft := range spacecrafts {
-		res, err := client.Index("spacecrafts", esutil.NewJSONReader(spacecraft), client.Index.WithDocumentID(strconv.Itoa(spacecraftID)))
-		if err == nil { // nit: err patter should be in the form `if err != nil`
-			defer res.Body.Close() // bug: this defer is called ina for loop, it won't defer as expected
-			fmt.Println(res)
-		} else {
-			fmt.Println(err)
+		res, err := esClient.Index("spacecrafts", esutil.NewJSONReader(spacecraft), esClient.Index.WithDocumentID(strconv.Itoa(spacecraftID)))
+		if err != nil {
+			return err
 		}
+		res.Body.Close()
 	}
 	return nil
 }
 
-func DeleteIndex(ctx context.Context, indexName string) error {
-	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
-
-	res, err := client.Indices.Delete([]string{indexName})
+func DeleteIndex(esClient *elasticsearch.Client, indexName string) error {
+	res, err := esClient.Indices.Delete([]string{indexName})
 	if err != nil {
 		return fmt.Errorf("failed to delete index %q with err: %v", indexName, err)
 	}
@@ -63,14 +60,14 @@ func DeleteIndex(ctx context.Context, indexName string) error {
 	return nil
 }
 
-// FIXME: understand how to wait for all of the data to be indexed
-func IndexSpacecraftAsDocumentsAsync(ctx context.Context) error {
-	spacecrafts := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
-	client := ctx.Value(domain.ClientKey).(*elasticsearch.Client)
-
+func IndexSpacecraftAsDocumentsAsync(ctx context.Context, esClient *elasticsearch.Client) error {
+	spacecrafts, err := domain.GetSpacecraftsFromCtx(ctx)
+	if err != nil {
+		return err
+	}
 	bulkIndexer, err := esutil.NewBulkIndexer(esutil.BulkIndexerConfig{
 		Index:      "spacecrafts",
-		Client:     client,
+		Client:     esClient,
 		NumWorkers: 5,
 		Refresh:    "wait_for",
 	})

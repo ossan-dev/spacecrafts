@@ -16,7 +16,7 @@ func (s *ITSuite) TestLoadspacecraftAsync() {
 
 	// assert
 	require.Nil(s.T(), err)
-	spacecraft, ok := ctx.Value(domain.ModelsKey).([]*domain.Spacecraft)
-	s.True(ok)
-	s.NotEmpty(spacecraft)
+	spacecrafts, err := domain.GetSpacecraftsFromCtx(ctx)
+	require.Nil(s.T(), err)
+	s.NotEmpty(spacecrafts)
 }

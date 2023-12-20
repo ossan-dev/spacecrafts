@@ -16,7 +16,7 @@ func Loadspacecraft(ctx context.Context, url string) (context.Context, error) {
 		elapsedTime := time.Since(startTime)
 		fmt.Println("Loadspacecraft() took", elapsedTime)
 	}()
-	var spacecraft []*domain.Spacecraft
+	var spacecrafts []*domain.Spacecraft
 	pageNumber := 0
 	for {
 		res, err := http.Get(fmt.Sprintf("%v/spacecraft?pageNumber=%d&pageSize=100", url, pageNumber))
@@ -34,12 +34,12 @@ func Loadspacecraft(ctx context.Context, url string) (context.Context, error) {
 		if len(spacecraftWrapper.Data) == 0 {
 			return ctx, fmt.Errorf("no spacecraft in the page")
 		}
-		spacecraft = append(spacecraft, spacecraftWrapper.Data...)
+		spacecrafts = append(spacecrafts, spacecraftWrapper.Data...)
 		pageNumber++
 		if pageNumber == spacecraftWrapper.TotalPages {
 			break
 		}
 	}
-	ctx = context.WithValue(ctx, domain.ModelsKey, spacecraft)
+	ctx = domain.WithSpacecrafts(ctx, spacecrafts)
 	return ctx, nil
 }

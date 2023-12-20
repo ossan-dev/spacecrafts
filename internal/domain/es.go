@@ -1,8 +1,5 @@
 package domain
 
-/****************************************************/
-/************* Elasticsearch Types ******************/
-/****************************************************/
 type LookupResponse struct {
 	Index   string      `json:"_index"`
 	ID      string      `json:"id"`
