@@ -4,6 +4,7 @@ type LookupResponse struct {
 	Index   string      `json:"_index"`
 	ID      string      `json:"id"`
 	Version int         `json:"_version"`
+	Found   bool        `json:"found"`
 	Source  *Spacecraft `json:"_source"`
 }
 

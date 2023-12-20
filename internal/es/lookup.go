@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 
 	"spacecraft/internal/domain"
 
@@ -17,19 +16,18 @@ func GetByID(esClient *elasticsearch.Client, index, documentID string) (*domain.
 		return nil, fmt.Errorf("err while looking up the document with ID: %v with err: %w", documentID, err)
 	}
 	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		data, err := io.ReadAll(res.Body)
-		if err != nil {
-			// nit: here we lose the not 200 error context
-			return nil, fmt.Errorf("err while reading response body: %w", err)
-		}
-		return nil, fmt.Errorf("err with the Elasticsearch request processing: %v", string(data))
-	}
 	var lookupRes domain.LookupResponse
-	// a note on correct usage of json.NewDecoder:
-	// https://mottaquikarim.github.io/dev/posts/you-might-not-be-using-json.decoder-correctly-in-golang/
-	if err = json.NewDecoder(res.Body).Decode(&lookupRes); err != nil {
-		return nil, fmt.Errorf("failed to decode the elastic search result: %w", err)
+	jsonDecoder := json.NewDecoder(res.Body)
+	for {
+		if err := jsonDecoder.Decode(&lookupRes); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, fmt.Errorf("err while reading the stream: %w", err)
+		}
 	}
-	return lookupRes.Source, nil
+	if lookupRes.Found {
+		return lookupRes.Source, nil
+	}
+	return nil, fmt.Errorf("document with id: %q not found", documentID)
 }
