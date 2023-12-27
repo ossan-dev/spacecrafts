@@ -1,4 +1,4 @@
-package test
+package webserver
 
 import (
 	"context"
@@ -10,19 +10,19 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-type ITSuite struct {
+type WebServerSuite struct {
 	suite.Suite
 	Endpoint  string
 	Ctx       context.Context
 	Container testcontainers.Container
 }
 
-func (s *ITSuite) SetupSuite() {
+func (s *WebServerSuite) SetupSuite() {
 	var err error
 	s.Ctx = context.Background()
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: testcontainers.FromDockerfile{
-			Context: "../",
+			Context: "../../",
 		},
 		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor:   wait.ForExposedPort(),
@@ -40,7 +40,7 @@ func (s *ITSuite) SetupSuite() {
 	s.Endpoint = endpoint
 }
 
-func (s *ITSuite) TearDownSuite() {
+func (s *WebServerSuite) TearDownSuite() {
 	if s.Container != nil {
 		if err := s.Container.Terminate(s.Ctx); err != nil {
 			require.Nil(s.T(), err)
@@ -49,5 +49,5 @@ func (s *ITSuite) TearDownSuite() {
 }
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, new(ITSuite))
+	suite.Run(t, new(WebServerSuite))
 }

@@ -1,4 +1,4 @@
-package test
+package webserver
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func (s *ITSuite) TestLoadspacecraft() {
+func (s *WebServerSuite) TestLoadspacecraft() {
 	// act
 	ctx, err := clients.Loadspacecraft(context.Background(), fmt.Sprintf("http://%v", s.Endpoint))
 
