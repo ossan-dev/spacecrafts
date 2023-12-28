@@ -48,6 +48,6 @@ func (s *WebServerSuite) TearDownSuite() {
 	}
 }
 
-func TestSuite(t *testing.T) {
+func TestWebServerSuite(t *testing.T) {
 	suite.Run(t, new(WebServerSuite))
 }
